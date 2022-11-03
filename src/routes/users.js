@@ -1,9 +1,12 @@
-var express = require('express');
-var router = express.Router();
+const express = require('express');
+const router = express.Router();
 
-/* GET users listing. */
-router.get('/', function(req, res, next) {
-  res.send('respond with a resource');
-});
+const { update, remove, image} = require('../controllers/userController')
+const { checkToken, adminNotAutoDestroy} = require('../middlewares')
 
-module.exports = router;
+router
+    .patch('/', checkToken, update)
+    .delete('/:id?', checkToken, adminNotAutoDestroy, remove)
+    .get('/image/:img', image)
+
+module.exports = router
