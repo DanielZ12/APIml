@@ -1,4 +1,4 @@
-module.ezports = {
+module.exports = {
     image: (req, res) => {
 
     },

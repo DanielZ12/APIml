@@ -1,15 +1,22 @@
-const express = require('express');
+// ************ Require's ************
+const express = require("express");
 const router = express.Router();
 
-// Middleware requie
-const {registerImageAvatar, checkToken} = require('../middlewares/authController');
+// ************ Middleware Require ************
+const { uploadImageAvatar, checkToken } = require("../middlewares");
 
-// Controller require
-const {register, login, getUserAuthenticated} = require('../controllers/authController')
+// ************ Controller Require ************
+const { register, login, getUserAuthenticated } = require("../controllers/authController");
+
 
 router
-    .post('/register', register)
-    .post('/login', login)
-    .get('/me/:token?', checkToken, getUserAuthenticated)
+  /* POST REGISTER */
+  .post("/register", uploadImageAvatar.single("avatar"), register)
 
-module.exports = router;    
+  /* POST LOGIN */
+  .post("/login", login)
+
+  /* POST LOGIN */
+  .get("/me/:token?", checkToken, getUserAuthenticated);
+
+module.exports = router;
