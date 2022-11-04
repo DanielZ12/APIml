@@ -12,7 +12,7 @@ module.exports = (sequelize, DataTypes) => {
       })
       this.belongsTo(models.Rol, {
         as: 'rol',
-        foreignKey: 'rolid'
+        foreignKey: 'rolId'
       })
     }
   }
