@@ -8,6 +8,5 @@ module.exports = {
   ROL_ADMIN,
   ROL_USER,
   ID_ADMIN,
-  PASSWORD_DEFAULT,
-  IMG_DEFAULT
+  PASSWORD_DEFAULT
 }
