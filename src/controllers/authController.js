@@ -2,6 +2,7 @@ const { ROL_ADMIN, ROL_USER } = require('../constants');
 const db = require('../database/models');
 const {sign} = require("jsonwebtoken");
 const { hashSync, compare } = require('bcryptjs');
+const { literalQueryUrlImage } = require("../helpers/literalQueryUrlImage");
 
 
 module.exports = {
@@ -105,7 +106,36 @@ module.exports = {
       });
       }
     },
-    getUserAuthenticated: (req, res) => {
-        
+    getUserAuthenticated: async (req, res) => {
+        try {
+          const {id} = req.userToken
+          const options =  {
+            include: [{
+              association: 'addresses',
+              attributes: {
+                exclude: ['userId', 'deletedAt']
+              }
+            }],
+            attributes: {
+              exclude: ['deletedAt','password'],
+              include: [literalQueryUrlImage(req, "avatar", "avatar", "/users")]
+            }
+          }
+          const data = await db.User.findByPk(id,options)
+
+          res.status(200).json({
+            ok: true,
+            status:200,
+            data
+          })
+
+
+        } catch (error) {
+          res.status(500).json({
+            ok: false,
+            status:500,
+            msg: error.messege || "Error en el servidor"
+          })
+        }
     }
 }
