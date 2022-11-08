@@ -3,6 +3,7 @@ const db = require('../database/models');
 const {sign} = require("jsonwebtoken");
 const { hashSync, compare } = require('bcryptjs');
 const { literalQueryUrlImage } = require("../helpers/literalQueryUrlImage");
+const { sendJsonError } = require('../helpers/sendJsonError');
 
 
 module.exports = {
@@ -20,7 +21,7 @@ module.exports = {
             name: name?.trim(),
             surname: surname?.trim(),
             email: email?.trim(),
-            password: hashSync(password?.trim(), 12),
+            password: password?.trim(),
             street: street?.trim(),
             city: city?.trim(),
             province: province?.trim(),
@@ -47,11 +48,8 @@ module.exports = {
           
 
         } catch (error) {
-            res.status(500).json({
-                ok:false,
-                status: 500,
-                mge: "error en el server"
-            });
+            sendJsonError(error, res)
+            
         }
     },
     login: async(req, res) => {
@@ -59,32 +57,20 @@ module.exports = {
         const { email, password } = req.body
 
         if (!email || !password) {
-          return res.status(401).json({
-              ok: false,
-              status: 401,
-              msg: "El email y password son requeridos"
-          })
+          return sendJsonError("El email y password son requerdidos", res, 401)
         }
 
-        const {id, rolId, password: passwordHash} = await db.User.findOne({
-          where: {email}
-        })
+        const user = await db.User.findOne({ where: { email } });
+
+      const { id, rolId, password: passwordHash } = user || { id:null, rolId:null,password:null }
         if (!id) {
-          return res.status(404).json({
-            ok: false,
-            status: 404,
-            msg: "No existe el usuario"
-        })
+          return sendJsonError("No existe el usuario con ese email", res, 404)
         }
 
         const isPassValid = await compare(password, passwordHash)
 
         if (!isPassValid) {
-          return res.status(401).json({
-            ok: false,
-            status: 401,
-            msg: "Credenciales invalidas"
-        })
+          return sendJsonError("Credenciales invalidas", res)  
         }
 
         const token = await sign({ id, rolId}, process.env.SECRET_KEY_JWT, {
@@ -99,11 +85,7 @@ module.exports = {
         })
 
       } catch (error) {
-        res.status(500).json({
-          ok:false,
-          status: 500,
-          mge: error.messege
-      });
+        sendJsonError(error, res);
       }
     },
     getUserAuthenticated: async (req, res) => {
@@ -129,13 +111,8 @@ module.exports = {
             data
           })
 
-
         } catch (error) {
-          res.status(500).json({
-            ok: false,
-            status:500,
-            msg: error.messege || "Error en el servidor"
-          })
+          return sendJsonError(error, res)
         }
     }
 }
