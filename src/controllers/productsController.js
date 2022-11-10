@@ -169,6 +169,7 @@ const controller = {
   },
   detail: async (req, res) => {
     try {
+      const idProduct = req.params.id
       let options = {
         include: [
           {
@@ -176,6 +177,7 @@ const controller = {
             attributes: {
               include: [ literalQueryUrlImage(req, "file", "file" )
               ],
+              exclude: ['createdAt', 'updatedAt', 'productId']
             },
           },
           {
@@ -189,8 +191,14 @@ const controller = {
           exclude: ["updatedAt", "deletedAt", "createdAt"],
         },
       };
+      if (isNaN(idProduct)) {
+        return sendJsonError("El parametro es invalido", res)
+      }
+      const product = await db.Product.findByPk(idProduct, options)
 
-      const product = await db.Product.findByPk(req.params.id, options)
+      if(!product){
+        return sendJsonError("El producto solicitado no existe", res, 404)
+      }
 
       return res.status(200).json({
         ok: true,
