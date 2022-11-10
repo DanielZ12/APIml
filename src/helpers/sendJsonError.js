@@ -15,7 +15,7 @@ const sendJsonError = (err ,res,codeStatus = /[sequelize|AggregateError]/i.test(
   let prop = "error";
   let responseError;
   let errorsArray;
-
+  console.log("error", err.message);
   if (typeof err === "string") {
     responseError = err;
   } else if (/[sequelize|AggregateError]/i.test(err.name)) {
@@ -27,9 +27,8 @@ const sendJsonError = (err ,res,codeStatus = /[sequelize|AggregateError]/i.test(
 
     prop += "s";
     responseError = mapped(errorsArray);
-  } else if (err.message) {
-    responseError = err.message;
-  }
+  } 
+  responseError = err.message ? err.message : responseError 
 
   return res.status(codeStatus).json({
     ok: false,
