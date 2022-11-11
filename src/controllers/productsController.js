@@ -210,7 +210,44 @@ const controller = {
       return sendJsonError(error, res);
     }
   },
-  store: (req, res) => {},
+  store: async (req, res) => {
+    try {
+      const {name, price, discount, description, categoryId} = req.body
+
+      const product = await db.Product.create({
+        name:name?.trim(),
+        price: +price,
+        discount: discount,
+        description: description?.trim(),
+        categoryId: +categoryId
+      })
+      let images = [{productId: product.id}]
+
+      if (req.files?.length) {
+        images = req.files.map(file => {
+          return {
+            productId: product.id,
+            file: file.filename,
+          }
+        })
+      }
+      await db.Image.bulkCreate(images)
+      const productReload= await product.reload({
+        include: ['images', 'category'],
+        
+      })
+
+      return res.status(201).json({
+        ok: true,
+        status: 201,
+        data: productReload
+
+      })
+
+    } catch (error) {
+      sendJsonError(error, res)
+    }
+  },
   update: (req, res) => {},
   destroy: (req, res) => {},
 };
